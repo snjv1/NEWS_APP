@@ -4,18 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.LoaderManager;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
@@ -26,7 +17,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
     private NewsListAdapter mnewsListAdapter;
 
     @Override
@@ -36,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         // find recycler view layout
         // set type of layout on screen
-        recyclerView=findViewById(R.id.recylerView123);
+        RecyclerView recyclerView = findViewById(R.id.recylerView123);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -56,44 +46,34 @@ public class MainActivity extends AppCompatActivity {
         String url = "https://saurav.tech/NewsAPI/top-headlines/category/health/in.json";
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                (Request.Method.GET, url, null, response -> {
+                    try {
+                        JSONArray newsJsonArray = response.getJSONArray("articles");
 
-
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONArray newsJsonArray = response.getJSONArray("articles");
-
-                            ArrayList<News> newsArray = new ArrayList<>();
-                            for(int i=0; i<newsJsonArray.length(); i++)
-                            {
-                                JSONObject newsJsonObject = newsJsonArray.getJSONObject(i);
-                                News news = new News(
-                                        newsJsonObject.getString("title"),
-                                newsJsonObject.getString("author"),
-                                newsJsonObject.getString("url"),
-                                newsJsonObject.getString("urlToImage")
-                                );
-                                newsArray.add(news);
-                            }
-
-                            mnewsListAdapter.updateNews(newsArray);
-                        }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-
-
+                        ArrayList<News> newsArray = new ArrayList<>();
+                        for(int i=0; i<newsJsonArray.length(); i++)
+                        {
+                            JSONObject newsJsonObject = newsJsonArray.getJSONObject(i);
+                            News news = new News(
+                                    newsJsonObject.getString("title"),
+                            newsJsonObject.getString("author"),
+                            newsJsonObject.getString("url"),
+                            newsJsonObject.getString("urlToImage")
+                            );
+                            newsArray.add(news);
                         }
 
+                        mnewsListAdapter.updateNews(newsArray);
                     }
-                }, new Response.ErrorListener() {
+                    catch (JSONException e) {
+                        e.printStackTrace();
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
 
                     }
+
+                }, error -> {
+
+
                 });
 
 // Access the RequestQueue through your singleton class.
